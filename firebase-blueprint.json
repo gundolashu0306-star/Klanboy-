@@ -1,0 +1,160 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Student user profile and verification record on Campus Plug SA",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "institutionName": { "type": "string" },
+        "campusCode": { "type": "string" },
+        "campusName": { "type": "string" },
+        "studentNumber": { "type": "string" },
+        "course": { "type": "string" },
+        "degree": { "type": "string" },
+        "yearOfStudy": { "type": "integer" },
+        "bio": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "verificationStatus": {
+          "type": "string",
+          "enum": ["NOT_SUBMITTED", "PENDING", "VERIFIED", "REJECTED"]
+        },
+        "verificationDocumentUrl": { "type": "string" },
+        "verificationDocumentName": { "type": "string" },
+        "verificationSubmittedAt": { "type": "string", "format": "date-time" },
+        "verificationRejectionReason": { "type": "string" },
+        "isStudentVerified": { "type": "boolean" },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "campusCode"]
+    },
+    "Community": {
+      "title": "Community",
+      "description": "Institutional student community, faculty society, or campus club",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Community title" },
+        "description": { "type": "string", "description": "About this community" },
+        "category": { "type": "string", "description": "Category pillar" },
+        "campusCode": { "type": "string", "description": "Campus institutional code" },
+        "institutionName": { "type": "string", "description": "University or college name" },
+        "campusName": { "type": "string", "description": "Branch campus name" },
+        "imageUrl": { "type": "string", "description": "Cover banner or logo" },
+        "creatorId": { "type": "string", "description": "UID of founder or society leader" },
+        "creatorName": { "type": "string", "description": "Display name of founder" },
+        "memberCount": { "type": "integer", "description": "Total registered members" },
+        "memberUids": { "type": "array", "description": "List of member student UIDs" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "description", "category", "campusCode", "creatorId"]
+    },
+    "CommunityPost": {
+      "title": "CommunityPost",
+      "description": "Discussion post, question, or announcement inside a community space",
+      "type": "object",
+      "properties": {
+        "communityId": { "type": "string", "description": "Parent community document ID" },
+        "authorId": { "type": "string", "description": "UID of author" },
+        "authorName": { "type": "string", "description": "Author student name" },
+        "authorPhotoUrl": { "type": "string", "description": "Author avatar URL" },
+        "isAuthorVerified": { "type": "boolean", "description": "Author student verification status" },
+        "title": { "type": "string", "description": "Discussion topic title" },
+        "content": { "type": "string", "description": "Post body text" },
+        "likesCount": { "type": "integer", "description": "Number of student likes" },
+        "likedBy": { "type": "array", "description": "List of student UIDs who liked" },
+        "commentsCount": { "type": "integer", "description": "Number of replies" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["communityId", "authorId", "authorName", "content"]
+    },
+    "PlugPost": {
+      "title": "PlugPost",
+      "description": "Student-authored post, marketplace listing, or housing plug",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorCampus": { "type": "string" },
+        "isAuthorVerified": { "type": "boolean" },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "priceZar": { "type": "number" },
+        "contactWhatsapp": { "type": "string" },
+        "imageUrls": { "type": "array" },
+        "likesCount": { "type": "integer" },
+        "commentsCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "category", "title", "content"]
+    },
+    "FeedPost": {
+      "title": "FeedPost",
+      "description": "Realtime student broadcast post with text and optional media attachments",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhotoUrl": { "type": "string" },
+        "authorCampus": { "type": "string" },
+        "isAuthorVerified": { "type": "boolean" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "likesCount": { "type": "integer" },
+        "likedBy": { "type": "array" },
+        "commentsCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "content"]
+    },
+    "FeedComment": {
+      "title": "FeedComment",
+      "description": "Student reply or comment on a feed post",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhotoUrl": { "type": "string" },
+        "isAuthorVerified": { "type": "boolean" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["postId", "authorId", "authorName", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Individual student account profiles and verification documents"
+    },
+    "/communities/{communityId}": {
+      "schema": "Community",
+      "description": "Institutional student societies, faculty clubs, and campus circles"
+    },
+    "/communities/{communityId}/posts/{postId}": {
+      "schema": "CommunityPost",
+      "description": "Discussion threads and announcements inside a community"
+    },
+    "/posts/{postId}": {
+      "schema": "FeedPost",
+      "description": "Real-time chronological student feed posts"
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": "FeedComment",
+      "description": "Student comments and discussions on feed posts"
+    },
+    "/campuses/{campusCode}/plugs/{plugId}": {
+      "schema": "PlugPost",
+      "description": "Campus-scoped community plugs, housing reviews, and marketplace items"
+    }
+  }
+}

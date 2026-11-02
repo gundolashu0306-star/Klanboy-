@@ -1,0 +1,241 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.admin == true) ||
+        (request.auth.token.email != null && request.auth.token.email.matches('.*@campusplug\\.co\\.za'))
+      );
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['email', 'displayName', 'campusCode']) &&
+             data.email is string && data.email.size() > 3 && data.email.size() < 255 &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() < 100 &&
+             data.campusCode is string && data.campusCode.size() > 0 && data.campusCode.size() < 30 &&
+             (!('institutionName' in data) || data.institutionName is string) &&
+             (!('campusName' in data) || data.campusName is string) &&
+             (!('studentNumber' in data) || data.studentNumber is string) &&
+             (!('course' in data) || data.course is string) &&
+             (!('degree' in data) || data.degree is string) &&
+             (!('bio' in data) || data.bio is string) &&
+             (!('phoneNumber' in data) || data.phoneNumber is string) &&
+             (!('yearOfStudy' in data) || (data.yearOfStudy is int && data.yearOfStudy >= 1 && data.yearOfStudy <= 10)) &&
+             (!('verificationStatus' in data) || data.verificationStatus in ['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED']) &&
+             (!('verificationDocumentUrl' in data) || data.verificationDocumentUrl is string) &&
+             (!('verificationDocumentName' in data) || data.verificationDocumentName is string) &&
+             (!('verificationRejectionReason' in data) || data.verificationRejectionReason is string) &&
+             (!('isStudentVerified' in data) || data.isStudentVerified is bool) &&
+             (!('isAdmin' in data) || data.isAdmin is bool) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidPlugPost(data) {
+      return data.keys().hasAll(['authorId', 'authorName', 'category', 'title', 'content']) &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() < 100 &&
+             data.category is string && data.category.size() > 0 && data.category.size() < 50 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 5000 &&
+             (!('priceZar' in data) || (data.priceZar is number && data.priceZar >= 0)) &&
+             (!('contactWhatsapp' in data) || data.contactWhatsapp is string) &&
+             (!('imageUrls' in data) || data.imageUrls is list) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidCommunity(data) {
+      return data.keys().hasAll(['name', 'category', 'creatorId']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 50 &&
+             data.creatorId is string && data.creatorId == request.auth.uid &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 2000)) &&
+             (!('institution' in data) || data.institution is string) &&
+             (!('campusCode' in data) || data.campusCode is string) &&
+             (!('imageUrl' in data) || data.imageUrl is string) &&
+             (!('memberCount' in data) || (data.memberCount is int && data.memberCount >= 0)) &&
+             (!('memberUids' in data) || data.memberUids is list) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidCommunityPost(data) {
+      return data.keys().hasAll(['communityId', 'authorId', 'authorName', 'content']) &&
+             data.communityId is string &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() <= 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 5000 &&
+             (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+             (!('tag' in data) || data.tag is string) &&
+             (!('likesCount' in data) || (data.likesCount is int && data.likesCount >= 0)) &&
+             (!('likedBy' in data) || data.likedBy is list) &&
+             (!('repliesCount' in data) || (data.repliesCount is int && data.repliesCount >= 0)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidFeedPost(data) {
+      return data.keys().hasAll(['authorId', 'authorName', 'content']) &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() <= 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 5000 &&
+             (!('imageUrl' in data) || data.imageUrl is string) &&
+             (!('authorPhotoUrl' in data) || data.authorPhotoUrl is string) &&
+             (!('authorCampus' in data) || data.authorCampus is string) &&
+             (!('isAuthorVerified' in data) || data.isAuthorVerified is bool) &&
+             (!('likesCount' in data) || (data.likesCount is int && data.likesCount >= 0)) &&
+             (!('likedBy' in data) || data.likedBy is list) &&
+             (!('commentsCount' in data) || (data.commentsCount is int && data.commentsCount >= 0)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidFeedComment(data) {
+      return data.keys().hasAll(['postId', 'authorId', 'authorName', 'content']) &&
+             data.postId is string &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() <= 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 2000 &&
+             (!('authorPhotoUrl' in data) || data.authorPhotoUrl is string) &&
+             (!('isAuthorVerified' in data) || data.isAuthorVerified is bool) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    // Student profile collection: /users/{userId}
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+
+      // On registration, students cannot mark themselves verified or admin
+      allow create: if isOwner(userId) &&
+                       isValidUserProfile(request.resource.data) &&
+                       (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false) &&
+                       (!('verificationStatus' in request.resource.data) || request.resource.data.verificationStatus in ['NOT_SUBMITTED', 'PENDING']) &&
+                       (!('isStudentVerified' in request.resource.data) || request.resource.data.isStudentVerified == false);
+
+      // On update:
+      // 1. Authorised administrators can update any field, including approving or rejecting verification.
+      // 2. Normal students can edit permitted profile fields, but CANNOT self-verify or gain admin status.
+      allow update: if (isAdmin() && isValidUserProfile(request.resource.data)) ||
+                       (isOwner(userId) &&
+                        isValidUserProfile(request.resource.data) &&
+                        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
+                        (request.resource.data.verificationStatus != 'VERIFIED' || resource.data.verificationStatus == 'VERIFIED') &&
+                        (!('isStudentVerified' in request.resource.data) || request.resource.data.isStudentVerified == resource.data.isStudentVerified) &&
+                        (request.resource.data.verificationStatus in ['NOT_SUBMITTED', 'PENDING', resource.data.verificationStatus]));
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Campus Communities: /communities/{communityId}
+    match /communities/{communityId} {
+      allow read: if isAuthenticated();
+
+      // Authorized student can create a community
+      allow create: if isAuthenticated() && isValidCommunity(request.resource.data);
+
+      // Updates:
+      // 1. Creator or admin can update details
+      // 2. Any student can join or leave (updating only memberUids and memberCount)
+      allow update: if isAuthenticated() && (
+        (resource.data.creatorId == request.auth.uid || isAdmin()) ||
+        (
+          request.resource.data.creatorId == resource.data.creatorId &&
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.category == resource.data.category &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberCount', 'updatedAt'])
+        )
+      );
+
+      // Deletion allowed for creator or admin
+      allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || isAdmin());
+
+      // Community discussion posts: /communities/{communityId}/posts/{postId}
+      match /posts/{postId} {
+        allow read: if isAuthenticated();
+
+        allow create: if isAuthenticated() && 
+                         request.resource.data.communityId == communityId &&
+                         isValidCommunityPost(request.resource.data);
+
+        // Update allowed for post author OR any student toggling like (likedBy, likesCount)
+        allow update: if isAuthenticated() && (
+          (resource.data.authorId == request.auth.uid && 
+           request.resource.data.authorId == request.auth.uid &&
+           isValidCommunityPost(request.resource.data)) ||
+          (
+            request.resource.data.authorId == resource.data.authorId &&
+            request.resource.data.communityId == resource.data.communityId &&
+            request.resource.data.content == resource.data.content &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy', 'likesCount', 'updatedAt'])
+          )
+        );
+
+        allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+      }
+    }
+
+    // Realtime Student Feed: /posts/{postId}
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated() && isValidFeedPost(request.resource.data);
+
+      // Updates: author can edit, or other students can toggle likes, or increment commentsCount
+      allow update: if isAuthenticated() && (
+        (resource.data.authorId == request.auth.uid &&
+         request.resource.data.authorId == request.auth.uid &&
+         isValidFeedPost(request.resource.data)) ||
+        (
+          request.resource.data.authorId == resource.data.authorId &&
+          request.resource.data.content == resource.data.content &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy', 'likesCount', 'commentsCount', 'updatedAt'])
+        )
+      );
+
+      // Post author or admin can delete post
+      allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+
+      // Comments subcollection: /posts/{postId}/comments/{commentId}
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+
+        allow create: if isAuthenticated() &&
+                         request.resource.data.postId == postId &&
+                         isValidFeedComment(request.resource.data);
+
+        allow update: if isAuthenticated() &&
+                         resource.data.authorId == request.auth.uid &&
+                         request.resource.data.authorId == request.auth.uid &&
+                         isValidFeedComment(request.resource.data);
+
+        allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+      }
+    }
+
+    // Campus-scoped community feeds, market plugs, and housing reviews
+    match /campuses/{campusCode}/plugs/{plugId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidPlugPost(request.resource.data);
+      allow update: if isAuthenticated() && 
+                    resource.data.authorId == request.auth.uid && 
+                    request.resource.data.authorId == request.auth.uid && 
+                    isValidPlugPost(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+  }
+}

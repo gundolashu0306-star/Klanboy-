@@ -1,0 +1,6 @@
+{
+  "name": "Campus Plug SA",
+  "description": "South African student-centred digital platform connecting students to campus communities, accommodation, marketplaces, academic resources, and opportunities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
